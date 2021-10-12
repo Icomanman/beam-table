@@ -24,14 +24,14 @@ function App() {
         const vue_options = {
             components: {
                 // table body component:
-                table_body: tableBody(),
+                table_comp: tableBody(),
             },
             data: function () {
                 return {
                     shared: ACI.UI.data
                 };
             },
-            el: "#table-app",
+            el: "#app",
             methods: {
                 // selectItem(evt) {
                 //     const entries = Object.keys(this.is_open);
@@ -39,8 +39,14 @@ function App() {
                 //         this.is_open[entry] = entry === evt['val'] ? true : false
                 //     });
                 // },
+                addRow: function () {
+                    alert('add row');
+                },
+                deleteRow: function () {
+                    alert('delete row');
+                },
                 runTable: function () {
-
+                    alert('run table');
                 }
             },
             mounted: function () {

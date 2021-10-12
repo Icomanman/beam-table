@@ -3,7 +3,7 @@ const child_process = require('child_process');
 
 // Create server
 const app = express();
-const port = 1020;
+const port = 3000;
 const url = 'http://localhost:' + port;
 
 app.listen(port, function () {
