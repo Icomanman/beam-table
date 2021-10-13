@@ -1,16 +1,20 @@
 
+import { calcBending } from "./app.mjs";
+
 const tableRow = () => {
     const comp_options = {
         data: function () {
             return {
                 table_rows: [1, 2],
                 depths: [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800],
-                widths: [250, 300, 350, 400, 450, 500, 550, 600]
+                widths: [250, 300, 350, 400, 450, 500, 550, 600],
+                b_arr: [],
+                h_arr: []
             }
         },
         methods: {
             updateValue: function (evt, key) {
-
+                calcBending();
             }
         },
         mounted: function () {
@@ -27,6 +31,9 @@ const tableRow = () => {
             ACI.v_EVENT.$on('delete_row', dat => {
                 (this.table_rows).pop();
             });
+        },
+        props: {
+            passed: Object
         },
         template: `
         <tbody>
@@ -49,6 +56,13 @@ const tableRow = () => {
                         </div>
                      </div>
                 </td>
+                <template v-for="rebar in passed.rebars">
+                    <td v-for="pc in passed.pcs">
+                        {{pc}}-{{rebar}} kNm
+                    </td>
+                    </template>
+                <td v-for="spac in passed.spacs">{{spac}} kN</td>
+                <td>d / 2</td>
             <tr/>
         </tbody>
         `
@@ -91,7 +105,7 @@ export function tableBody() {
                 <th>d / 2</th>
             </tr>
             </thead>
-            <table_row/>
+            <table_row :passed="{rebars, pcs, spacs}"/>
         </table>
         `
     };

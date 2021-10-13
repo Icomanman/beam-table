@@ -3,13 +3,50 @@ const ACI = (function () {
     const j = {};
     j.UI = {};
     j.UI.data = {};
+    j.results = [];
     return j;
 })();
 
 // All jQuery initialisations:
 function initUI() {
-    // jQuery('#beam-width').dropdown();
-    // jQuery('#beam-heigt').dropdown();
+    // form validations:
+    const fields = {
+        fc: {
+            identifier: 'fc',
+            rules: [
+                { type: 'number', prompt: "Please enter a valid number for f'c." },
+                { type: 'decimal', prompt: "Please enter a valid number for f'c." }
+            ]
+        },
+        fy: {
+            identifier: 'fy',
+            rules: [
+                { type: 'number', prompt: 'Please enter a valid number for fy.' },
+                { type: 'decimal', prompt: 'Please enter a valid number for fy.' }
+            ]
+        },
+        links: {
+            identifier: 'links',
+            rules: [
+                { type: 'number', prompt: 'Please enter a valid number for link diameter.' },
+                { type: 'decimal', prompt: 'Please enter a valid number for link diameter.' }
+            ]
+        },
+        cc: {
+            identifier: 'cc',
+            rules: [
+                { type: 'number', prompt: 'Please enter a valid number for clear concrete cover.' },
+                { type: 'decimal', prompt: 'Please enter a valid number for clear concrete cover.' }
+            ]
+        }
+
+    };
+    jQuery('#props-form').form({
+        on: 'blur',
+        fields,
+        onFailure: () => false,
+        onSuccess: () => false
+    });
 }
 
 function App() {
@@ -33,12 +70,6 @@ function App() {
             },
             el: "#app",
             methods: {
-                // selectItem(evt) {
-                //     const entries = Object.keys(this.is_open);
-                //     entries.forEach(entry => {
-                //         this.is_open[entry] = entry === evt['val'] ? true : false
-                //     });
-                // },
                 addRow: function () {
                     ACI.v_EVENT.$emit('add_row');
                 },
@@ -46,14 +77,10 @@ function App() {
                     ACI.v_EVENT.$emit('delete_row');
                 },
                 runTable: function () {
-                    alert('run table');
                 }
             },
             mounted: function () {
                 console.log(`> ACI.v_UI mounted.`);
-                // ACI.v_EVENT.$on('nav_selection', evt => {
-                //     this.selectItem(evt);
-                // });
             },
             name: "aci-beam-app"
         };

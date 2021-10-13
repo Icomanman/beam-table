@@ -36,19 +36,19 @@
       <div class="ui segment" style="margin: 1.6rem">
          <div class="ui grid">
             <div class="six wide column">
-               <form class="ui small form">
+               <form id="props-form" class="ui small form">
                   <h4>Properties:</h4>
                   <div class="two fields">
                      <div class="field">
                         <div class="ui labeled input">
                            <div class="ui label">f'c, MPa</div>
-                           <input type="text" placeholder="27" />
+                           <input name="fc" type="text" placeholder="27" autocomplete="off" />
                         </div>
                      </div>
                      <div class="field">
                         <div class="ui labeled input">
                            <div class="ui label">fy, MPa</div>
-                           <input type="text" placeholder="414" />
+                           <input name="fy" type="text" placeholder="414" autocomplete="off" />
                         </div>
                      </div>
                   </div>
@@ -56,18 +56,19 @@
                      <div class="field">
                         <div class="ui labeled input">
                            <div class="ui label">Links, mm</div>
-                           <input type="text" placeholder="10" />
+                           <input name="links" type="text" placeholder="10" autocomplete="off" />
                         </div>
                      </div>
                      <div class="field">
                         <div class="ui labeled input">
                            <div class="ui label">Clear Cover, mm</div>
-                           <input type="text" placeholder="40" />
+                           <input name="cc" type="text" placeholder="40" autocomplete="off" />
                         </div>
                      </div>
                   </div>
+                  <div class="ui error message"></div>
+                  <button class="ui black button" @click="runTable">Run</button>
                </form>
-               <button class="ui black button" @click="runTable">Run</button>
             </div>
 
             <div class="eight wide column">
@@ -88,7 +89,7 @@
       </div>
       <table_comp></table_comp>
       <div class="ui container">
-         <div class="ui grid">
+         <div class="ui grid centered">
             <div class="row">
                <button class="ui black button" @click="addRow">Add Row</button>
                <button class="ui red button" @click="deleteRow">Delete Row</button>
@@ -96,7 +97,6 @@
          </div>
       </div>
    </main>
-   <script src="./js/app.js" type="text/javascript"></script>
    <script src="./js/main.js" type="text/javascript"></script>
    <script src="./js/loader.mjs" type="module"></script>
 </body>
