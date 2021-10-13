@@ -80,7 +80,7 @@ function App() {
                 }
             },
             mounted: function () {
-                console.log(`> ACI.v_UI mounted.`);
+                // console.log(`> ACI.v_UI mounted.`);
             },
             name: "aci-beam-app"
         };

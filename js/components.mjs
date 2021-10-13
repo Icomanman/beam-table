@@ -5,11 +5,11 @@ const tableRow = () => {
     const comp_options = {
         data: function () {
             return {
-                table_rows: [1, 2],
+                table_rows: [1],
                 depths: [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800],
                 widths: [250, 300, 350, 400, 450, 500, 550, 600],
-                b_arr: [],
-                h_arr: []
+                b_arr: [''],
+                h_arr: ['']
             }
         },
         methods: {
@@ -21,15 +21,30 @@ const tableRow = () => {
             jQuery('.ui.dropdown').dropdown();
             ACI.v_EVENT.$on('add_row', dat => {
                 const last_no = this.table_rows[(this.table_rows).length - 1];
-                (this.table_rows).push(last_no + 1);
-                // activate the dropdowns within the next tick:
-                this.$nextTick(() => {
-                    jQuery(`#b-selection-${last_no + 1}`).dropdown();
-                    jQuery(`#h-selection-${last_no + 1}`).dropdown();
-                });
+                if (last_no < 0 || !last_no) {
+                    (this.table_rows).push(1);
+                    (this.b_arr).push(null);
+                    (this.h_arr).push(null);
+                    this.$nextTick(() => {
+                        jQuery('#b-selection-1').dropdown();
+                        jQuery('#h-selection-1').dropdown();
+                    });
+
+                } else {
+                    (this.table_rows).push(last_no + 1);
+                    (this.b_arr).push('');
+                    (this.h_arr).push('');
+                    // activate the dropdowns within the next tick:
+                    this.$nextTick(() => {
+                        jQuery(`#b-selection-${last_no + 1}`).dropdown();
+                        jQuery(`#h-selection-${last_no + 1}`).dropdown();
+                    });
+                }
             });
             ACI.v_EVENT.$on('delete_row', dat => {
                 (this.table_rows).pop();
+                (this.b_arr).pop();
+                (this.h_arr).pop();
             });
         },
         props: {
@@ -40,19 +55,19 @@ const tableRow = () => {
             <tr v-for="(row, i) in table_rows" class="center aligned">
                 <td>
                     <div :id="'b-selection-' + (i + 1)" class="ui inline dropdown">
-                        <input type="hidden" :name="'b' + (i + 1)">
+                        <input type="hidden" :name="'b' + (i + 1)" v-model.lazy="b_arr[i + 1]">
                         <div class="default text">Select</div>
                         <div class="menu">
-                            <div class="item" v-for="(width, j) in widths" :data-value="j">{{width}}</div>
+                            <div class="item" v-for="width in widths" :data-value="width">{{width}}</div>
                         </div>
                      </div>
                 </td>
                 <td>
                     <div :id="'h-selection-' + (i + 1)" class="ui inline dropdown">
-                        <input type="hidden" :name="'h' + (i + 1)">
+                        <input type="hidden" :name="'h' + (i + 1)" v-model.lazy="h_arr[i + 1]">
                         <div class="default text">Select</div>
                         <div class="menu">
-                            <div class="item" v-for="(depth, k) in depths" :data-value="k">{{depth}}</div>
+                            <div class="item" v-for="depth in depths" :data-value="depth">{{depth}}</div>
                         </div>
                      </div>
                 </td>
