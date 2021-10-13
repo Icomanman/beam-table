@@ -3,7 +3,7 @@ const tableRow = () => {
     const comp_options = {
         data: function () {
             return {
-                table_rows: [1, 2, 3, 4, 5],
+                table_rows: [1, 2],
                 depths: [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800],
                 widths: [250, 300, 350, 400, 450, 500, 550, 600]
             }
@@ -14,28 +14,38 @@ const tableRow = () => {
             }
         },
         mounted: function () {
-            jQuery('.ui.dropdown').dropdown()
+            jQuery('.ui.dropdown').dropdown();
+            ACI.v_EVENT.$on('add_row', dat => {
+                const last_no = this.table_rows[(this.table_rows).length - 1];
+                (this.table_rows).push(last_no + 1);
+                // activate the dropdowns within the next tick:
+                this.$nextTick(() => {
+                    jQuery(`#b-selection-${last_no + 1}`).dropdown();
+                    jQuery(`#h-selection-${last_no + 1}`).dropdown();
+                });
+            });
+            ACI.v_EVENT.$on('delete_row', dat => {
+                (this.table_rows).pop();
+            });
         },
         template: `
         <tbody>
-            <tr v-for="row in table_rows">
+            <tr v-for="(row, i) in table_rows" class="center aligned">
                 <td>
-                    <div class="ui selection dropdown">
-                        <input type="hidden" name="b">
-                        <i class="dropdown icon"></i>
-                        <div class="default text">250 mm</div>
+                    <div :id="'b-selection-' + (i + 1)" class="ui inline dropdown">
+                        <input type="hidden" :name="'b' + (i + 1)">
+                        <div class="default text">Select</div>
                         <div class="menu">
-                            <div class="item" v-for="(width, i) in widths" :data-value="i">{{width}} mm</div>
+                            <div class="item" v-for="(width, j) in widths" :data-value="j">{{width}}</div>
                         </div>
                      </div>
                 </td>
                 <td>
-                    <div class="ui selection dropdown">
-                        <input type="hidden" name="h">
-                        <i class="dropdown icon"></i>
-                        <div class="default text">300 mm</div>
+                    <div :id="'h-selection-' + (i + 1)" class="ui inline dropdown">
+                        <input type="hidden" :name="'h' + (i + 1)">
+                        <div class="default text">Select</div>
                         <div class="menu">
-                            <div class="item" v-for="(depth, j) in depths" :data-value="j">{{depth}} mm</div>
+                            <div class="item" v-for="(depth, k) in depths" :data-value="k">{{depth}}</div>
                         </div>
                      </div>
                 </td>
@@ -72,8 +82,8 @@ export function tableBody() {
                 <th rowspan="1" colspan="4">Shear Capacity, &phi; = 0.75</th>
             </tr>
             <tr class="small-font center aligned">
-                <th>b</th>
-                <th>h</th>
+                <th>b<br>mm</th>
+                <th>h<br>mm</th>
                 <template v-for="(rebar,i) in rebars">
                     <th v-for="pc in pcs">{{pc}} - {{rebars[i]}}mm</th>
                 </template>

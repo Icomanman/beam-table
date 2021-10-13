@@ -40,10 +40,10 @@ function App() {
                 //     });
                 // },
                 addRow: function () {
-                    alert('add row');
+                    ACI.v_EVENT.$emit('add_row');
                 },
                 deleteRow: function () {
-                    alert('delete row');
+                    ACI.v_EVENT.$emit('delete_row');
                 },
                 runTable: function () {
                     alert('run table');
