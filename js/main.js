@@ -65,6 +65,7 @@ function App() {
             },
             data: function () {
                 return {
+                    year: new Date().getFullYear(),
                     shared: ACI.UI.data
                 };
             },
