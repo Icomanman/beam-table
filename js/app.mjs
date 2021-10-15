@@ -9,7 +9,7 @@ const calcSpacing = (b, cc, link) => {
 };
 
 export function calcBending() {
-
+    console.log('run');
 };
 
 const src = `
@@ -156,4 +156,4 @@ Sub CalculateShears(ByVal dWidth As Double, dHeight() As Double, absRow As Integ
     Next i
 
 End Sub
-`
+`;

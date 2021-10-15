@@ -14,28 +14,28 @@ function initUI() {
         fc: {
             identifier: 'fc',
             rules: [
-                { type: 'number', prompt: "Please enter a valid number for f'c." },
+                // { type: 'number', prompt: "Please enter a valid number for f'c." },
                 { type: 'decimal', prompt: "Please enter a valid number for f'c." }
             ]
         },
         fy: {
             identifier: 'fy',
             rules: [
-                { type: 'number', prompt: 'Please enter a valid number for fy.' },
+                // { type: 'number', prompt: 'Please enter a valid number for fy.' },
                 { type: 'decimal', prompt: 'Please enter a valid number for fy.' }
             ]
         },
         links: {
             identifier: 'links',
             rules: [
-                { type: 'number', prompt: 'Please enter a valid number for link diameter.' },
+                // { type: 'number', prompt: 'Please enter a valid number for link diameter.' },
                 { type: 'decimal', prompt: 'Please enter a valid number for link diameter.' }
             ]
         },
         cc: {
             identifier: 'cc',
             rules: [
-                { type: 'number', prompt: 'Please enter a valid number for clear concrete cover.' },
+                // { type: 'number', prompt: 'Please enter a valid number for clear concrete cover.' },
                 { type: 'decimal', prompt: 'Please enter a valid number for clear concrete cover.' }
             ]
         }
@@ -45,7 +45,13 @@ function initUI() {
         on: 'blur',
         fields,
         onFailure: () => false,
-        onSuccess: () => false
+        onSuccess: () => {
+            const input = jQuery('#props-form').find('input');
+            jQuery(input).each(function () {
+                ACI.UI.data[jQuery(this).attr('name')] = jQuery(this).val();
+            });
+            return false;
+        }
     });
 }
 
@@ -65,6 +71,7 @@ function App() {
             },
             data: function () {
                 return {
+                    year: new Date().getFullYear(),
                     shared: ACI.UI.data
                 };
             },
@@ -77,6 +84,7 @@ function App() {
                     ACI.v_EVENT.$emit('delete_row');
                 },
                 runTable: function () {
+                    ACI.v_EVENT.$emit('run');
                 }
             },
             mounted: function () {
