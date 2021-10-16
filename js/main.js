@@ -51,7 +51,7 @@ function App() {
     // use this instead of v-model to make way for SUI validations:
     const pullData = () => {
         const props = {};
-        const input = jQuery('#props-form').find('input');
+        let input = jQuery('#props-form').find('input');
         jQuery(input).each(function () {
             props[jQuery(this).attr('name')] = jQuery(this).val();
         });

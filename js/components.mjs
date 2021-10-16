@@ -41,25 +41,49 @@ const tableRow = () => {
     const comp_options = {
         data: function () {
             return {
-                table_rows: [1],
-                depths: [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800],
-                widths: [250, 300, 350, 400, 450, 500, 550, 600],
                 b_arr: [''],
+                depths: [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800],
+                fys: [275],
                 h_arr: [''],
                 moment_results: [],
+                run_done: false,
                 shear_results: [],
-                trans_spac: []
+                table_rows: [1],
+                trans_spac: [],
+                widths: [250, 300, 350, 400, 450, 500, 550, 600]
             }
         },
         filters: {
             roundOffSpac: function (val) {
-                return val >= rebar_data.min_spac ? val.toFixed(0) : '< 30';
+                // return val >= rebar_data.min_spac ? val.toFixed(0) : '< 30';
+                return val.toFixed(0);
             },
             roundOffMoments: function (val) {
-                return val > 0 ? `${val.toFixed(2)} kNm` : '0';
+                return val > 0 ? `${val.toFixed(1)} kNm` : '0';
+            },
+            roundOffShears: function (val) {
+                return val > 0 ? `${val.toFixed(1)} kN` : '0';
             }
         },
         methods: {
+            addZeroResults: function () {
+                // M
+                this.moment_results = (this.b_arr).map(b => []);
+                (this.b_arr).forEach((b, i) => {
+                    (rebar_data.rebars).forEach((bar) => {
+                        (rebar_data.pcs).forEach(pc => {
+                            (this.moment_results[i]).push(0);
+                        });
+                    })
+                });
+                // V
+                this.shear_results = (this.b_arr).map(b => []);
+                (this.b_arr).forEach((b, i) => {
+                    (rebar_data.link_spacs).forEach((bar) => {
+                        (this.shear_results[i]).push(0);
+                    })
+                });
+            },
             removeErr: function (id) {
                 removeErrorClass(id);
             },
@@ -70,7 +94,10 @@ const tableRow = () => {
                     const b_arr = this.b_arr;
                     const h_arr = this.h_arr;
                     const moment_data = { b_arr, h_arr, cc, links, trans_spac: this.trans_spac }
-                    this.moment_results = calcBending(fc, fy, moment_data);
+                    const { eff_depths, moment_results } = calcBending(fc, fy, moment_data);
+                    this.moment_results = moment_results;
+                    this.shear_results = calcShears(fc, this.fys, eff_depths, moment_data);
+                    this.run_done = true;
                 };
                 // row color to change to #e8e8e8
                 // else alert('err');
@@ -79,14 +106,7 @@ const tableRow = () => {
         mounted: function () {
             jQuery('.ui.dropdown').dropdown();
             // init the results for empty rows:
-            this.moment_results = (this.b_arr).map(b => []);
-            (this.b_arr).forEach((b, i) => {
-                (rebar_data.rebars).forEach((bar) => {
-                    (rebar_data.pcs).forEach(pc => {
-                        (this.moment_results[i]).push(0);
-                    });
-                })
-            });
+            this.addZeroResults();
             ACI.v_EVENT.$on('add_row', dat => {
                 const last_no = this.table_rows[(this.table_rows).length - 1];
                 if (last_no < 0 || !last_no) {
@@ -94,6 +114,7 @@ const tableRow = () => {
                     (this.b_arr).push(null);
                     (this.h_arr).push(null);
                     this.$nextTick(() => {
+                        jQuery('#fys-selection-1').dropdown();
                         jQuery('#b-selection-1').dropdown();
                         jQuery('#h-selection-1').dropdown();
                     });
@@ -104,10 +125,13 @@ const tableRow = () => {
                     (this.h_arr).push('');
                     // activate the dropdowns within the next tick:
                     this.$nextTick(() => {
+                        jQuery(`#fys-selection-${last_no + 1}`).dropdown();
                         jQuery(`#b-selection-${last_no + 1}`).dropdown();
                         jQuery(`#h-selection-${last_no + 1}`).dropdown();
                     });
                 }
+                (this.fys).push(275);
+                this.addZeroResults();
             });
             ACI.v_EVENT.$on('delete_row', dat => {
                 (this.table_rows).pop();
@@ -127,12 +151,12 @@ const tableRow = () => {
         <tbody>
             <tr :id="'spacing-' + row" v-for="(row, i) in table_rows" v-show="trans_spac[i]" class="center aligned" :key="row">
                 <td colspan="2">Spacing</td>
-                <td v-for="spac in trans_spac[i]">
+                <td v-for="spac in trans_spac[i]" :class="{ error : spac < 30 }">
                     {{spac | roundOffSpac}} mm
                 </td>
                 <td colspan="4">-</td>
             </tr>
-            <tr :id="'results-' + i" v-for="(row, i) in table_rows" class="center aligned" :key="row">
+            <tr :id="'results-' + i" v-for="(row, i) in table_rows" class="center aligned" :key="row" :class="{ grey : run_done }">
                 <td :id="'td-b' + i">
                     <div :id="'b-selection-' + (i + 1)" class="ui inline dropdown">
                         <input type="hidden" :name="'b' + row" v-model.lazy="b_arr[i]" @change="removeErr('td-b' + i)">
@@ -151,11 +175,18 @@ const tableRow = () => {
                         </div>
                      </div>
                 </td>
-                <td v-for="(result, j) in moment_results[i]">
-                    {{result | roundOffMoments}}
+                <td v-for="result in moment_results[i]">{{result | roundOffMoments}}</td>
+                <td v-for="result in shear_results[i]">{{result | roundOffShears}}</td>
+                <td>
+                    <div :id="'fys-selection-' + (i + 1)" class="ui inline dropdown fys">
+                        <input type="hidden" :name="'fys' + row" v-model.lazy="fys[i]">
+                        <div class="text">Select</div>
+                        <div class="menu">
+                            <div class="active item" :data-value="275">275</div>
+                            <div class="item" :data-value="414">414</div>
+                        </div>
+                     </div>
                 </td>
-                <td v-for="link_spac in passed.link_spacs">{{link_spac}} kN</td>
-                <td>d / 2</td>
             <tr/>
         </tbody>
         `
@@ -195,7 +226,7 @@ export function tableBody() {
                     <th v-for="pc in pcs">{{pc}} - {{rebars[i]}}mm</th>
                 </template>
                 <th v-for="link_spac in link_spacs">{{link_spac}} mm</th>
-                <th>d / 2</th>
+                <th>fy<sub>s</sub> (MPa)</th>
             </tr>
             </thead>
             <table_row :passed="{rebars, pcs, link_spacs}"/>
