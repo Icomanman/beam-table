@@ -1,20 +1,34 @@
 
 const Ast = (As, pcs) => As * pcs;
 
+const momentCapacity = (fc, fy, b, h, bar_data) => {
+    const { As, pc, cc, links, rebar } = bar_data;
+    const depth = parseFloat(h) - (cc + links + (rebar / 2));
+    const a = Ast(As, pc) * fy / (0.85 * fc * parseFloat(b));
+    const Mu = 0.9 * As * fy * (depth - (a / 2)) / 1000000;
+    return Mu;
+};
+
 export const rebar_data = {
     area: [201, 314, 490],
     rebars: [16, 20, 25],
     pcs: [2, 3, 4],
-    link_spacs: [100, 150, 200]
+    link_spacs: [100, 150, 200],
+    min_spac: 30
 };
 
-export function calcBending() {
-    console.log('run');
-    /* Loops
-    1. Actual table rows
-    2. Diameters
-    3. pcs
-    */
+export function calcBending(fc, fy, moment_data) {
+    const { area, pcs, rebars } = rebar_data;
+    const { b_arr, h_arr, cc, links, trans_spac } = moment_data;
+    const moment_results = b_arr.map(b => []);
+    b_arr.forEach((b, i) => {
+        rebars.forEach((rebar, j) => {
+            pcs.forEach(pc => {
+                moment_results[i].push(momentCapacity(fc, fy, b_arr[i], h_arr[i], { As: area[j], pc, cc, links, rebar }));
+            });
+        });
+    });
+    return moment_results;
 }
 
 export function calcShears() {
@@ -24,13 +38,13 @@ export function calcShears() {
     */
 }
 
-export function calcSpacing(b_arr, cc, link) {
+export function calcSpacing(b_arr, cc, links) {
     const { pcs, rebars } = rebar_data;
     const trans_spac = b_arr.map(b => []);
     b_arr.forEach((b, i) => {
         rebars.forEach(bar => {
             pcs.forEach(pc => {
-                trans_spac[i].push(b - 2 * (cc + link) - (bar * pc / (pc - 1)));
+                trans_spac[i].push(b - 2 * (cc + links) - (bar * pc / (pc - 1)));
             });
         });
     });

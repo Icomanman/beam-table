@@ -52,8 +52,11 @@ const tableRow = () => {
             }
         },
         filters: {
-            roundOff: function (val) {
-                return val.toFixed(0);
+            roundOffSpac: function (val) {
+                return val >= rebar_data.min_spac ? val.toFixed(0) : '< 30';
+            },
+            roundOffMoments: function (val) {
+                return val > 0 ? `${val.toFixed(2)} kNm` : '0';
             }
         },
         methods: {
@@ -64,7 +67,10 @@ const tableRow = () => {
                 if (!checkFields() && !checkProps(dat)) {
                     const { fc, fy, links, cc } = dat;
                     this.trans_spac = calcSpacing(this.b_arr, cc, links);
-                    // this.moment_results = (this.results).concat(calcBending(fc, fy, this.trans_spac));
+                    const b_arr = this.b_arr;
+                    const h_arr = this.h_arr;
+                    const moment_data = { b_arr, h_arr, cc, links, trans_spac: this.trans_spac }
+                    this.moment_results = calcBending(fc, fy, moment_data);
                 };
                 // row color to change to #e8e8e8
                 // else alert('err');
@@ -72,6 +78,15 @@ const tableRow = () => {
         },
         mounted: function () {
             jQuery('.ui.dropdown').dropdown();
+            // init the results for empty rows:
+            this.moment_results = (this.b_arr).map(b => []);
+            (this.b_arr).forEach((b, i) => {
+                (rebar_data.rebars).forEach((bar) => {
+                    (rebar_data.pcs).forEach(pc => {
+                        (this.moment_results[i]).push(0);
+                    });
+                })
+            });
             ACI.v_EVENT.$on('add_row', dat => {
                 const last_no = this.table_rows[(this.table_rows).length - 1];
                 if (last_no < 0 || !last_no) {
@@ -92,13 +107,12 @@ const tableRow = () => {
                         jQuery(`#b-selection-${last_no + 1}`).dropdown();
                         jQuery(`#h-selection-${last_no + 1}`).dropdown();
                     });
-                    (this.is_b_empty).push(false);
-                    (this.is_h_empty).push(false);
                 }
             });
             ACI.v_EVENT.$on('delete_row', dat => {
                 (this.table_rows).pop();
                 (this.trans_spac).pop();
+                (this.moment_results).pop();
                 (this.b_arr).pop();
                 (this.h_arr).pop();
             });
@@ -114,7 +128,7 @@ const tableRow = () => {
             <tr :id="'spacing-' + row" v-for="(row, i) in table_rows" v-show="trans_spac[i]" class="center aligned" :key="row">
                 <td colspan="2">Spacing</td>
                 <td v-for="spac in trans_spac[i]">
-                    {{spac | roundOff}} mm
+                    {{spac | roundOffSpac}} mm
                 </td>
                 <td colspan="4">-</td>
             </tr>
@@ -137,11 +151,9 @@ const tableRow = () => {
                         </div>
                      </div>
                 </td>
-                <template v-for="rebar in passed.rebars">
-                    <td v-for="pc in passed.pcs">
-                        {{pc}}-{{rebar}} kNm
-                    </td>
-                    </template>
+                <td v-for="(result, j) in moment_results[i]">
+                    {{result | roundOffMoments}}
+                </td>
                 <td v-for="link_spac in passed.link_spacs">{{link_spac}} kN</td>
                 <td>d / 2</td>
             <tr/>
