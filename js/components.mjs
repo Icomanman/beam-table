@@ -149,45 +149,47 @@ const tableRow = () => {
         },
         template: `
         <tbody>
-            <tr :id="'spacing-' + row" v-for="(row, i) in table_rows" v-show="trans_spac[i]" class="center aligned" :key="row">
-                <td colspan="2">Spacing</td>
-                <td v-for="spac in trans_spac[i]" :class="{ error : spac < 30 }">
-                    {{spac | roundOffSpac}} mm
-                </td>
-                <td colspan="4">-</td>
-            </tr>
-            <tr :id="'results-' + i" v-for="(row, i) in table_rows" class="center aligned" :key="row" :class="{ grey : run_done }">
-                <td :id="'td-b' + i">
-                    <div :id="'b-selection-' + (i + 1)" class="ui inline dropdown">
+            <template v-for="(row, i) in table_rows">
+                <tr :id="'spacing-' + row" v-show="trans_spac[i]" class="center aligned" :key="row">
+                    <td colspan="2">Spacing</td>
+                    <td v-for="spac in trans_spac[i]" :class="{ error : spac < 30 }">
+                        {{spac | roundOffSpac}} mm
+                    </td>
+                    <td colspan="4">-</td>
+                </tr>
+                <tr :id="'results-' + i" class="center aligned" :key="row" :class="{ grey : run_done }">
+                    <td :id="'td-b' + i">
+                        <div :id="'b-selection-' + (i + 1)" class="ui inline dropdown">
                         <input type="hidden" :name="'b' + row" v-model.lazy="b_arr[i]" @change="removeErr('td-b' + i)">
                         <div class="default text">Select</div>
                         <div class="menu">
                             <div class="item" v-for="width in widths" :data-value="width">{{width}}</div>
                         </div>
-                     </div>
-                </td>
-                <td :id="'td-h' + i">
-                    <div :id="'h-selection-' + (i + 1)" class="ui inline dropdown">
+                        </div>
+                    </td>
+                    <td :id="'td-h' + i">
+                        <div :id="'h-selection-' + (i + 1)" class="ui inline dropdown">
                         <input type="hidden" :name="'h' + row" v-model.lazy="h_arr[i]" @change="removeErr('td-h' + i)">
                         <div class="default text">Select</div>
                         <div class="menu">
                             <div class="item" v-for="depth in depths" :data-value="depth">{{depth}}</div>
                         </div>
-                     </div>
-                </td>
-                <td v-for="result in moment_results[i]">{{result | roundOffMoments}}</td>
-                <td v-for="result in shear_results[i]">{{result | roundOffShears}}</td>
-                <td>
-                    <div :id="'fys-selection-' + (i + 1)" class="ui inline dropdown fys">
+                        </div>
+                    </td>
+                    <td v-for="result in moment_results[i]">{{result | roundOffMoments}}</td>
+                    <td v-for="result in shear_results[i]">{{result | roundOffShears}}</td>
+                    <td>
+                        <div :id="'fys-selection-' + (i + 1)" class="ui inline dropdown fys">
                         <input type="hidden" :name="'fys' + row" v-model.lazy="fys[i]">
                         <div class="text">Select</div>
                         <div class="menu">
                             <div class="active item" :data-value="275">275</div>
                             <div class="item" :data-value="414">414</div>
                         </div>
-                     </div>
-                </td>
-            <tr/>
+                        </div>
+                    </td>
+                </tr>
+            </template>
         </tbody>
         `
     };

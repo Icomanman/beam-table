@@ -46,7 +46,7 @@ export function calcShears(fc, fys, eff_depths, moment_data) {
         vc[i] = 0.17 * (fc ** 0.5) * parseFloat(b_arr[i]) * eff_depths[i];
         link_spacs.forEach(spac => {
             const link_shear = vs(fy, eff_depths[i], spac, link_As);
-            shear_results[i].push((vc[i] + 0.75 * link_shear) / 1000);
+            shear_results[i].push(0.75 * (vc[i] + link_shear) / 1000);
         });
     });
     return shear_results;
