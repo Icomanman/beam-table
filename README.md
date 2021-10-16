@@ -1,6 +1,6 @@
 # ACI Beam Design Table
 
-#### Video Demo: <URL HERE>
+#### Video Demo: https://youtu.be/91nEMc-5Gyk
 
 #### GitHub Repo: https://github.com/Icomanman/beam-table
 
