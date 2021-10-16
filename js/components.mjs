@@ -1,5 +1,5 @@
 
-import { calcBending } from "./app.mjs";
+import { calcBending, calcShears, calcSpacing, rebar_data } from "./app.mjs";
 
 const checkFields = () => {
     let has_err = false;
@@ -16,16 +16,15 @@ const checkFields = () => {
     return has_err;
 };
 
-const checkProps = () => {
+const checkProps = dat => {
     let has_err = false;
     // extract and validate (additional check) data from props:
-    const DAT = ACI.UI.data;
-    const fields = Object.keys(DAT);
+    const fields = Object.keys(dat);
     if (fields.length < 4) return true;
     else {
         var nans = fields.filter(field => {
-            DAT[field] = parseFloat(DAT[field]);
-            return isNaN(DAT[field]);
+            dat[field] = parseFloat(dat[field]);
+            return isNaN(dat[field]);
         });
     }
     if (nans.length > 0) has_err = true;
@@ -47,7 +46,14 @@ const tableRow = () => {
                 widths: [250, 300, 350, 400, 450, 500, 550, 600],
                 b_arr: [''],
                 h_arr: [''],
-                results: []
+                moment_results: [],
+                shear_results: [],
+                trans_spac: []
+            }
+        },
+        filters: {
+            roundOff: function (val) {
+                return val.toFixed(0);
             }
         },
         methods: {
@@ -55,7 +61,12 @@ const tableRow = () => {
                 removeErrorClass(id);
             },
             runCalc: function (dat) {
-                if (!checkFields() && !checkProps()) calcBending();
+                if (!checkFields() && !checkProps(dat)) {
+                    const { fc, fy, links, cc } = dat;
+                    this.trans_spac = calcSpacing(this.b_arr, cc, links);
+                    // this.moment_results = (this.results).concat(calcBending(fc, fy, this.trans_spac));
+                };
+                // row color to change to #e8e8e8
                 // else alert('err');
             }
         },
@@ -87,11 +98,12 @@ const tableRow = () => {
             });
             ACI.v_EVENT.$on('delete_row', dat => {
                 (this.table_rows).pop();
+                (this.trans_spac).pop();
                 (this.b_arr).pop();
                 (this.h_arr).pop();
             });
             ACI.v_EVENT.$on('run', dat => {
-                this.runCalc();
+                this.runCalc(dat);
             });
         },
         props: {
@@ -99,7 +111,14 @@ const tableRow = () => {
         },
         template: `
         <tbody>
-            <tr v-for="(row, i) in table_rows" class="center aligned" :key="row">
+            <tr :id="'spacing-' + row" v-for="(row, i) in table_rows" v-show="trans_spac[i]" class="center aligned" :key="row">
+                <td colspan="2">Spacing</td>
+                <td v-for="spac in trans_spac[i]">
+                    {{spac | roundOff}} mm
+                </td>
+                <td colspan="4">-</td>
+            </tr>
+            <tr :id="'results-' + i" v-for="(row, i) in table_rows" class="center aligned" :key="row">
                 <td :id="'td-b' + i">
                     <div :id="'b-selection-' + (i + 1)" class="ui inline dropdown">
                         <input type="hidden" :name="'b' + row" v-model.lazy="b_arr[i]" @change="removeErr('td-b' + i)">
@@ -123,7 +142,7 @@ const tableRow = () => {
                         {{pc}}-{{rebar}} kNm
                     </td>
                     </template>
-                <td v-for="spac in passed.spacs">{{spac}} kN</td>
+                <td v-for="link_spac in passed.link_spacs">{{link_spac}} kN</td>
                 <td>d / 2</td>
             <tr/>
         </tbody>
@@ -139,9 +158,9 @@ export function tableBody() {
         },
         data: function () {
             return {
-                rebars: [16, 20, 25],
-                pcs: [2, 3, 4],
-                spacs: [100, 150, 200]
+                rebars: rebar_data.rebars,
+                pcs: rebar_data.pcs,
+                link_spacs: rebar_data.link_spacs
             }
         },
         mounted: function () {
@@ -163,11 +182,11 @@ export function tableBody() {
                 <template v-for="(rebar,i) in rebars">
                     <th v-for="pc in pcs">{{pc}} - {{rebars[i]}}mm</th>
                 </template>
-                <th v-for="spac in spacs">{{spac}} mm</th>
+                <th v-for="link_spac in link_spacs">{{link_spac}} mm</th>
                 <th>d / 2</th>
             </tr>
             </thead>
-            <table_row :passed="{rebars, pcs, spacs}"/>
+            <table_row :passed="{rebars, pcs, link_spacs}"/>
         </table>
         `
     };

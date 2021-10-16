@@ -2,8 +2,6 @@
 const ACI = (function () {
     const j = {};
     j.UI = {};
-    j.UI.data = {};
-    j.results = [];
     return j;
 })();
 
@@ -36,26 +34,29 @@ function initUI() {
             identifier: 'cc',
             rules: [
                 // { type: 'number', prompt: 'Please enter a valid number for clear concrete cover.' },
-                { type: 'decimal', prompt: 'Please enter a valid number for clear concrete cover.' }
+                // { type: 'decimal', prompt: 'Please enter a valid number for clear concrete cover.' },
+                { type: 'regExp[/(^[1]{1}00$)|(^[1-9]{1}[0-9]{1}$)/]', prompt: 'Clear concrete cover should be 10mm to 100mm.' }
             ]
         }
-
     };
     jQuery('#props-form').form({
         on: 'blur',
         fields,
         onFailure: () => false,
-        onSuccess: () => {
-            const input = jQuery('#props-form').find('input');
-            jQuery(input).each(function () {
-                ACI.UI.data[jQuery(this).attr('name')] = jQuery(this).val();
-            });
-            return false;
-        }
+        onSuccess: () => false
     });
 }
 
 function App() {
+    // use this instead of v-model to make way for SUI validations:
+    const pullData = () => {
+        const props = {};
+        const input = jQuery('#props-form').find('input');
+        jQuery(input).each(function () {
+            props[jQuery(this).attr('name')] = jQuery(this).val();
+        });
+        return props;
+    };
     // Vue event bus
     (function () {
         ACI.v_EVENT = new Vue();
@@ -72,7 +73,6 @@ function App() {
             data: function () {
                 return {
                     year: new Date().getFullYear(),
-                    shared: ACI.UI.data
                 };
             },
             el: "#app",
@@ -84,11 +84,9 @@ function App() {
                     ACI.v_EVENT.$emit('delete_row');
                 },
                 runTable: function () {
-                    ACI.v_EVENT.$emit('run');
+                    const dat = pullData();
+                    if (Object.keys(dat).length == 4) ACI.v_EVENT.$emit('run', dat);
                 }
-            },
-            mounted: function () {
-                // console.log(`> ACI.v_UI mounted.`);
             },
             name: "aci-beam-app"
         };

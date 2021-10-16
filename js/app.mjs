@@ -1,16 +1,41 @@
-const rebar_data = {
-    area: [],
-    diameter: [],
-    pcs: []
-};
 
-const calcSpacing = (b, cc, link) => {
+const Ast = (As, pcs) => As * pcs;
 
+export const rebar_data = {
+    area: [201, 314, 490],
+    rebars: [16, 20, 25],
+    pcs: [2, 3, 4],
+    link_spacs: [100, 150, 200]
 };
 
 export function calcBending() {
     console.log('run');
-};
+    /* Loops
+    1. Actual table rows
+    2. Diameters
+    3. pcs
+    */
+}
+
+export function calcShears() {
+    /* Loops
+    1. Actual table rows
+    2. link spacing
+    */
+}
+
+export function calcSpacing(b_arr, cc, link) {
+    const { pcs, rebars } = rebar_data;
+    const trans_spac = b_arr.map(b => []);
+    b_arr.forEach((b, i) => {
+        rebars.forEach(bar => {
+            pcs.forEach(pc => {
+                trans_spac[i].push(b - 2 * (cc + link) - (bar * pc / (pc - 1)));
+            });
+        });
+    });
+    return trans_spac;
+}
 
 const src = `
 Private Ast(11) As Double
