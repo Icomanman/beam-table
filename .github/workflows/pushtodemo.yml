@@ -30,4 +30,4 @@ jobs:
         npm run build
     - name: Copy /dist to /root
       run: |
-        cp -r js/dist/* ./js
+        mkdir -p ./js/dist && cp -r js/dist/* ./js/dist
