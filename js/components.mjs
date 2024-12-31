@@ -132,6 +132,11 @@ const tableRow = () => {
                 }
                 (this.fys).push(275);
                 this.addZeroResults();
+
+                gtag('event', 'click', {
+                    'event_category': 'Button',
+                    'event_label': 'Row Added'
+                });
             });
             ACI.v_EVENT.$on('delete_row', dat => {
                 (this.table_rows).pop();
@@ -139,9 +144,18 @@ const tableRow = () => {
                 (this.moment_results).pop();
                 (this.b_arr).pop();
                 (this.h_arr).pop();
+
+                gtag('event', 'click', {
+                    'event_category': 'Button',
+                    'event_label': 'Row Deleted'
+                });
             });
             ACI.v_EVENT.$on('run', dat => {
                 this.runCalc(dat);
+                gtag('event', 'click', {
+                    'event_category': 'Button',
+                    'event_label': 'App Run'
+                });
             });
         },
         props: {
