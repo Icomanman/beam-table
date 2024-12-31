@@ -1,5 +1,8 @@
 name: NodeJS with Webpack
 
+permissions:
+  id-token: read-write
+
 on:
   push:
     branches:
